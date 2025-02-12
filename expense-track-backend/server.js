@@ -1,34 +1,49 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+require("dotenv").config();
 
 // Create Express app
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json()); // Or use: app.use(express.json());
+app.use(express.json());
+
+// Validate environment variables
+const PORT = process.env.PORT || 5000;
+const mongoURI = process.env.mongoURI;
+
+if (!mongoURI) {
+  console.error("❌ MongoDB connection string is missing in .env file.");
+  process.exit(1);
+}
 
 // Connect to MongoDB
-const mongoURI = 'mongodb+srv://rahulchhabra9000:Rahul321@cluster0.rj6bz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    process.exit(1);
+  }
+};
 
-// Define a port
-const PORT = process.env.PORT || 5000;
+connectDB();
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Import and use routes
+app.use("/api/expenses", require("./routes/expenses"));
+app.use("/api/auth", require("./routes/auth"));
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("❌ Server error:", err);
+  res.status(500).json({ message: "Internal Server Error", error: err.message });
 });
 
-// Import routes
-const expenseRoutes = require('./routes/expenses');
-
-// Use the routes
-app.use('/api/expenses', expenseRoutes);
+// Start the server
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

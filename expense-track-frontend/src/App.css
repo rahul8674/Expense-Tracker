@@ -92,6 +92,19 @@ body {
   background: darkred;
 }
 
+.edit-btn {
+  background: orange;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: darkorange;
+}
+
 @media (max-width: 600px) {
   .app-container {
     width: 90%;
